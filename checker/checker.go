@@ -1,8 +1,9 @@
 package checker
 
 import (
-	"context"
 	"fmt"
+	"strings"
+	"sync"
 	"time"
 )
 
@@ -24,56 +25,53 @@ type HealthCheck struct {
 
 type Checker struct {
 	items []Checkable
-	ctx   context.Context
-	stop  context.CancelFunc
+	mutex sync.Mutex
 }
 
 func NewChecker() *Checker {
-	ctx, stop := context.WithCancel(context.Background())
-
 	return &Checker{
-		ctx:  ctx,
-		stop: stop,
+		items: make([]Checkable, 0),
 	}
 }
 
 func (c *Checker) Add(item Checkable) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
 	c.items = append(c.items, item)
+}
+
+func (c *Checker) String() string {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	var ids []string
+	for _, item := range c.items {
+		ids = append(ids, item.GetID())
+	}
+
+	return strings.Join(ids, ", ")
+}
+
+func (c *Checker) Check() {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	for _, item := range c.items {
+		if !item.Health() {
+			fmt.Println(item.GetID(), "не работает")
+		}
+	}
 }
 
 func (c *Checker) Run() {
 	ticker := time.NewTicker(5 * time.Second)
-	defer ticker.Stop()
 
-	for {
-		select {
-		case <-ticker.C:
-			c.Check()
-		case <-c.ctx.Done():
-			fmt.Println("Проверки остановлены")
-			return
-		}
+	for range ticker.C {
+		c.Check()
 	}
 }
 
 func (c *Checker) Stop() {
-	c.stop()
-}
-
-func (c *Checker) Check() {
-	for _, item := range c.items {
-		if !item.Health() {
-			fmt.Println(item.GetID() + " не работает")
-		}
-	}
-}
-
-func (c *Checker) String() string {
-	var output string
-
-	for _, item := range c.items {
-		output += item.GetID() + "\n"
-	}
-
-	return output
+	fmt.Println("Проверки остановлены")
 }

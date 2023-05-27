@@ -1,17 +1,13 @@
 package gometr
 
 import (
+	"fmt"
 	"time"
 )
 
 type GoMetrClient struct {
 	URL     string
 	TimeOut time.Duration
-}
-
-type HealthCheck struct {
-	ServiceID string
-	Healthy   bool
 }
 
 func NewGoMetrClient(url string, timeout time.Duration) *GoMetrClient {
@@ -21,14 +17,26 @@ func NewGoMetrClient(url string, timeout time.Duration) *GoMetrClient {
 	}
 }
 
-func (g *GoMetrClient) getHealth() HealthCheck {
-	// Логика получения состояния здоровья сервиса
+func (g *GoMetrClient) GetMetrics() string {
+	return "Metrics for " + g.URL
+}
+
+func (g *GoMetrClient) Ping() error {
+	// Simulating a ping to the URL
 	// ...
 
-	return HealthCheck{
-		ServiceID: g.URL,
-		Healthy:   true,
-	}
+	return nil
+}
+
+func (g *GoMetrClient) GetID() string {
+	return g.URL
+}
+
+func (g *GoMetrClient) getHealth() bool {
+	// Simulating a health check
+	// ...
+
+	return true
 }
 
 func (g *GoMetrClient) Health() bool {
@@ -37,8 +45,9 @@ func (g *GoMetrClient) Health() bool {
 
 	select {
 	case <-timer.C:
+		fmt.Println("Timeout occurred for", g.URL)
 		return false
 	default:
-		return g.getHealth().Healthy
+		return g.getHealth()
 	}
 }
