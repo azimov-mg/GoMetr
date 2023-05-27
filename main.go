@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/azimov-mg/gometr/checker"
 	"github.com/azimov-mg/gometr/gometr"
-	"time"
 )
 
 func main() {
@@ -15,9 +16,11 @@ func main() {
 	c.Add(g1)
 	c.Add(g2)
 
-	fmt.Print(c)
+	go c.Run()
 
-	c.Check()
+	time.Sleep(15 * time.Second)
+
+	c.Stop()
 
 	fmt.Println("Program exited")
 }
