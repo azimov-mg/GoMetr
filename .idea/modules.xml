@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/gometr.iml" filepath="$PROJECT_DIR$/.idea/gometr.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/gometr-main.iml" filepath="$PROJECT_DIR$/.idea/gometr-main.iml" />
     </modules>
   </component>
 </project>
